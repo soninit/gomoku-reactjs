@@ -22,7 +22,9 @@ class Board extends React.Component {
 	}
 
   renderSquare(rowIdx, columnIdx) {
-    return <Square row={rowIdx} column={columnIdx} onClick={() => this.props.onClick(rowIdx, columnIdx)}/>;
+    return <Square row={rowIdx} column={columnIdx} 
+		value={this.props.squares[rowIdx][columnIdx]}
+		onClick={() => this.props.onClick(rowIdx, columnIdx)}/>;
   }
 
   render() {
