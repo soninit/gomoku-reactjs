@@ -1,8 +1,8 @@
 import React from "react";
 import Board from "./board";
 
-const GAMEBOARD_ROW = 10;
-const GAMEBOARD_COLUMN = 10;
+const GAMEBOARD_ROW = 20;
+const GAMEBOARD_COLUMN = 20;
 const STEP_WIN = 5;
 
 class Game extends React.Component {
@@ -42,7 +42,6 @@ class Game extends React.Component {
     const squares = current.squares.slice();
     const winner = calculateWinner(squares);
     if (winner || squares[rowIdx][columnIdx] !== "e") {
-      console.log(winner);
       return;
     }
     squares[rowIdx][columnIdx] = this.state.xIsNext ? "x" : "o";
@@ -68,8 +67,6 @@ class Game extends React.Component {
   }
 
   jumpTo(step) {
-    console.log(step, this.state.stepNumber, this.state.history);
-
     this.setState({
       stepNumber: step,
       xIsNext: step % 2 !== 0,
@@ -212,6 +209,11 @@ function winnerVertical(squares) {
   }
 
   return null;
+}
+
+function winnerDianogal(square) {
+	// TODO: implemented
+	return null;
 }
 
 function calculateWinner(squares) {
