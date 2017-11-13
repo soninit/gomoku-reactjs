@@ -29,11 +29,10 @@ class Game extends React.Component {
 			moves: [],
 			stepNumber: 0,
 			xIsNext: true,
-			currentSelected: -1
+			currentSelected: -1,
+			isOrderAsc: false
 		}
 	}
-
-	
 
 	handleClick(rowIdx, columnIdx) {
 		const history = JSON.parse(JSON.stringify(this.state.history.slice(0, this.state.stepNumber + 1)));
@@ -57,9 +56,14 @@ class Game extends React.Component {
 				currentSelected: -1
 		});
 	}
-    
+		
+	handleToggleOrder() {
+		this.setState({isOrderAsc: !this.state.isOrderAsc});
+	}
     
 	jumpTo(step) {
+		console.log(step, this.state.stepNumber, this.state.history);
+
 		this.setState({
 			stepNumber: step,
 			xIsNext: (step % 2) !== 0,
@@ -68,13 +72,25 @@ class Game extends React.Component {
 	}
 
   render() {
-		const history = this.state.history;
+		const isOrderAsc = this.state.isOrderAsc;
+		const history = isOrderAsc ? this.state.history : this.state.history.slice(0).reverse();
 		const historyMoves = this.state.moves;
-		const current = history[this.state.stepNumber];
-		const winner = calculateWinner(current.squares);
+		const current = this.state.history[this.state.stepNumber];
 		const currentSelected = this.state.currentSelected;
 
-    const moves = history.map((step, move) => {
+		const winner = calculateWinner(current.squares);
+
+    const moves = history.map((step, idx) => {
+			let move;
+
+			if (isOrderAsc) {
+				move = idx;
+			} else {
+				move = history.length - idx - 1;
+			}
+
+			console.log(`history: ${history.length} items, move: ${move}, index: ${history.length - idx - 1}`,'history', history, 'historyMoves', historyMoves);
+
 			let desc;
 			if (move) {
 				const row = historyMoves[move - 1].row;
@@ -89,7 +105,9 @@ class Game extends React.Component {
 							<button className={move === currentSelected ? 'bold-text' : ''} onClick={() => this.jumpTo(move)}>{desc}</button>
 					</li>
 			)
-    });
+		});
+		
+		console.log('================');
 
     let status;
     if (winner) {
@@ -109,8 +127,9 @@ class Game extends React.Component {
 			/>
         </div>
         <div className="game-info">
+					<button type="button" onClick={() => this.handleToggleOrder()}>{this.state.isOrderAsc ? 'Desc' : 'Asc'}</button>
           <div>{status}</div>
-          <ol>{moves}</ol>
+          <ol className="no-style">{moves}</ol>
         </div>
       </div>
     );
