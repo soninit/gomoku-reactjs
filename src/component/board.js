@@ -22,9 +22,13 @@ class Board extends React.Component {
 	}
 
   renderSquare(rowIdx, columnIdx) {
+		const winnerMoves = this.props.winnerMoves;
+
     return <Square row={rowIdx} column={columnIdx} 
-		value={this.props.squares[rowIdx][columnIdx]}
-		onClick={() => this.props.onClick(rowIdx, columnIdx)}/>;
+			isWinnerMove={winnerMoves && rowIdx <= winnerMoves.toRow && rowIdx >= winnerMoves.fromRow 
+										&& columnIdx <= winnerMoves.toCol && columnIdx >= winnerMoves.fromCol}
+			value={this.props.squares[rowIdx][columnIdx]}
+			onClick={() => this.props.onClick(rowIdx, columnIdx)}/>;
   }
 
   render() {
