@@ -182,7 +182,7 @@ function winnerHorizontal(squares) {
         fromRow: i,
         toRow: i,
         fromCol: result.index,
-        toCol: result.index + STEP_WIN
+        toCol: result.index + STEP_WIN - 1
       };
     }
   }
@@ -203,7 +203,7 @@ function winnerVertical(squares) {
       return {
         winner: result.winner,
         fromRow: result.index,
-        toRow: result.index + STEP_WIN,
+        toRow: result.index + STEP_WIN - 1,
         fromCol: c,
         toCol: c
       };
