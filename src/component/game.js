@@ -2,7 +2,7 @@ import React from "react";
 import Board from "./board";
 
 const GAMEBOARD_ROW = 10;
-const GAMEBOARD_COLUMN = 10;
+const GAMEBOARD_COLUMN = GAMEBOARD_ROW;
 const STEP_WIN = 5;
 
 class Game extends React.Component {
@@ -20,7 +20,7 @@ class Game extends React.Component {
       xIsNext: true,
       currentSelected: -1,
 			isOrderAsc: true,
-			winnerMoves: null
+      winnerMoves: null,
     };
   }
 
@@ -28,13 +28,11 @@ class Game extends React.Component {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice(0);
-    const winner = calculateWinner(squares);
-    console.log('stop condition', winner, squares[rowIdx * GAMEBOARD_ROW + columnIdx]);
+    const lastMove = this.state.moves[this.state.moves.length - 1];
+    const winner = calculateWinner(squares, lastMove);
     if (winner || squares[rowIdx * GAMEBOARD_ROW + columnIdx] !== "e") {
-      console.log('should stop');
       return;
     }
-    console.log('handleClick', squares);
     squares[rowIdx * GAMEBOARD_ROW + columnIdx] = this.state.xIsNext ? "x" : "o";
     this.setState({
       history: history.concat([
@@ -71,7 +69,7 @@ class Game extends React.Component {
     const current = this.state.history[this.state.stepNumber];
     const currentSelected = this.state.currentSelected;
 
-    const winner = calculateWinner(current.squares);
+    const winner = calculateWinner(current.squares, this.state.moves[this.state.moves.length - 1]);
 
     const moves = history.map((step, idx) => {
       let move;
@@ -164,6 +162,7 @@ function winnerHorizontal(squares) {
     if (result) {
       return {
         winner: result.winner,
+        type: 'h',
         fromRow: i,
         toRow: i,
         fromCol: result.index,
@@ -186,6 +185,7 @@ function winnerVertical(squares) {
     if (result) {
       return {
         winner: result.winner,
+        type: 'v',
         fromRow: result.index,
         toRow: result.index + STEP_WIN - 1,
         fromCol: c,
@@ -198,18 +198,109 @@ function winnerVertical(squares) {
   return null;
 }
 
-function winnerDianogal(square) {
-	// TODO: implemented
+function findTopLeft(rowIdx, colIdx) {
+  if (rowIdx === colIdx) 
+    return {row: 0, col: 0};
+  else if (rowIdx < colIdx) {
+    if (rowIdx === 0 || colIdx == 0)
+      return {row: rowIdx, col: colIdx};
+    return {row: 0, col: colIdx - rowIdx};
+  } else { // rowIdx > colIdx
+    if (rowIdx === 0 || colIdx == 0)
+      return {row: rowIdx, col: colIdx};
+    return {row: rowIdx - colIdx, col: 0};
+  }
+}
+
+function findTopRight(rowIdx, colIdx) {
+  if (rowIdx + colIdx === GAMEBOARD_COLUMN - 1)
+    return {row: 0, col: GAMEBOARD_COLUMN - 1};
+  else if (rowIdx + colIdx > GAMEBOARD_COLUMN - 1) {
+    if (colIdx === GAMEBOARD_COLUMN - 1 || rowIdx === 0)
+      return {row: rowIdx, col: colIdx};
+    return {row: rowIdx - (GAMEBOARD_COLUMN - 1 - colIdx), col: GAMEBOARD_COLUMN - 1}
+  } else {
+    if (colIdx === GAMEBOARD_COLUMN - 1 || rowIdx === 0)
+      return {row: rowIdx, col: colIdx};
+    return {row: 0, col: colIdx + rowIdx};
+  }
+}
+
+function winnerDianogal(squares, lastMove) {
+  if (!lastMove)
+    return null;
+
+  const currentRow = parseInt(lastMove / GAMEBOARD_ROW);
+  const currentCol = lastMove % GAMEBOARD_COLUMN;
+
+  console.log('param lastmove', lastMove);
+  // dianogal ltr
+  const topLeft = findTopLeft(currentRow, currentCol);
+
+  let ltrRow = topLeft.row;
+  let ltrCol = topLeft.col;
+  let strLtr = '';
+
+  while (ltrRow <= GAMEBOARD_ROW - 1 && ltrCol <= GAMEBOARD_COLUMN - 1) {
+    strLtr = strLtr + squares[ltrRow * GAMEBOARD_ROW + ltrCol];
+
+    ltrRow++;
+    ltrCol++;
+  }
+
+
+  console.log(`ltr str: ${strLtr}`);
+  const ltrWinner = xoWinner(strLtr);
+
+  if (ltrWinner) {
+    console.log('ltr winner', ltrWinner);
+    return {
+      winner: ltrWinner.winner,
+      type: 'ltr'
+    }
+  }
+  
+  // dianogal rtl
+  const topRight = findTopRight(currentRow, currentCol);
+  console.log('top right', topRight, lastMove, currentRow, currentCol);
+
+  let rtlRow = topRight.row;
+  let rtlCol = topRight.col;
+  let strRtl = '';
+
+  while (rtlRow < GAMEBOARD_ROW - 1 && rtlCol >= 0) {
+    strRtl = strRtl + squares[rtlRow  * GAMEBOARD_ROW + rtlCol];
+
+    rtlRow++;
+    rtlCol--;
+  }
+
+  console.log(`rtl str: ${strRtl}`);
+
+  const rtlWinner = xoWinner(strRtl);
+
+  if (rtlWinner) {
+    console.log('rtlWinner', rtlWinner);
+    return {
+      winner: rtlWinner.winner,
+      type: 'rtl'
+    }
+  }
+    
+
 	return null;
 }
 
-function calculateWinner(squares) {
+function calculateWinner(squares, lastMove) {
   const winnerH = winnerHorizontal(squares);
 
   if (winnerH) return winnerH;
 
   const winnerV = winnerVertical(squares);
   if (winnerV) return winnerV;
+  
+  const winnerD = winnerDianogal(squares, lastMove);
+  if (winnerD) return winnerD;
 
   return null;
 }
