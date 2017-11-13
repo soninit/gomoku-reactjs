@@ -1,28 +1,18 @@
 import React from "react";
 import Board from "./board";
 
-const GAMEBOARD_ROW = 20;
-const GAMEBOARD_COLUMN = 20;
+const GAMEBOARD_ROW = 10;
+const GAMEBOARD_COLUMN = 10;
 const STEP_WIN = 5;
 
 class Game extends React.Component {
   constructor(props) {
     super(props);
 
-    const squares = [GAMEBOARD_ROW];
-
-    for (let r = 0; r < GAMEBOARD_ROW; r++) {
-      squares[r] = [GAMEBOARD_COLUMN];
-
-      for (let t = 0; t < GAMEBOARD_COLUMN; t++) {
-        squares[r][t] = "e";
-      }
-    }
-
     this.state = {
       history: [
         {
-          squares: squares
+          squares: Array(GAMEBOARD_COLUMN * GAMEBOARD_ROW).fill('e')
         }
       ],
       moves: [],
@@ -35,26 +25,24 @@ class Game extends React.Component {
   }
 
   handleClick(rowIdx, columnIdx) {
-    const history = JSON.parse(
-      JSON.stringify(this.state.history.slice(0, this.state.stepNumber + 1))
-    );
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
-    const squares = current.squares.slice();
+    const squares = current.squares.slice(0);
     const winner = calculateWinner(squares);
-    if (winner || squares[rowIdx][columnIdx] !== "e") {
+    console.log('stop condition', winner, squares[rowIdx * GAMEBOARD_ROW + columnIdx]);
+    if (winner || squares[rowIdx * GAMEBOARD_ROW + columnIdx] !== "e") {
+      console.log('should stop');
       return;
     }
-    squares[rowIdx][columnIdx] = this.state.xIsNext ? "x" : "o";
+    console.log('handleClick', squares);
+    squares[rowIdx * GAMEBOARD_ROW + columnIdx] = this.state.xIsNext ? "x" : "o";
     this.setState({
       history: history.concat([
         {
           squares: squares
         }
       ]),
-      moves: this.state.moves.concat({
-        row: rowIdx,
-        col: columnIdx
-      }),
+      moves: this.state.moves.concat(rowIdx * GAMEBOARD_ROW + columnIdx),
       xIsNext: !this.state.xIsNext,
       stepNumber: history.length,
 			currentSelected: -1,
@@ -69,7 +57,7 @@ class Game extends React.Component {
   jumpTo(step) {
     this.setState({
       stepNumber: step,
-      xIsNext: step % 2 !== 0,
+      xIsNext: step % 2 == 0,
       currentSelected: step
     });
   }
@@ -96,8 +84,8 @@ class Game extends React.Component {
 
       let desc;
       if (move) {
-        const row = historyMoves[move - 1].row;
-        const column = historyMoves[move - 1].col;
+        const row = parseInt(historyMoves[move - 1] / GAMEBOARD_ROW);
+        const column = historyMoves[move - 1] % GAMEBOARD_COLUMN;
         desc = `Go to move ${move}, (${row}, ${column})`;
       } else {
         desc = "Go to game start";
@@ -169,8 +157,8 @@ function xoWinner(str) {
 }
 
 function winnerHorizontal(squares) {
-  for (let i = 0; i < squares.length; i++) {
-    const hStr = squares[i].join("");
+  for (let i = 0; i < GAMEBOARD_ROW; i++) {
+    const hStr = squares.slice(i * GAMEBOARD_ROW, i * GAMEBOARD_ROW + GAMEBOARD_COLUMN).join('');
     const result = xoWinner(hStr);
 
     if (result) {
@@ -188,12 +176,11 @@ function winnerHorizontal(squares) {
 }
 
 function winnerVertical(squares) {
-  for (let c = 0; c < squares[0].length; c++) {
+  for (let c = 0; c < GAMEBOARD_COLUMN; c++) {
     let vStr = "";
-    for (let r = 0; r < squares.length; r++) {
-      vStr = vStr + squares[r][c];
+    for (let r = 0; r < GAMEBOARD_ROW; r++) {
+      vStr = vStr + squares[r * GAMEBOARD_ROW + c];
     }
-
     const result = xoWinner(vStr);
 
     if (result) {

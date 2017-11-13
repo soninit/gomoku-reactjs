@@ -6,7 +6,7 @@ class Board extends React.Component {
 	renderBoard() {
 		var rowEles = [];
 		for (let rowIdx = 0; rowIdx < this.props.rows; rowIdx++) {
-				rowEles.push(this.renderRows(rowIdx));
+			rowEles.push(this.renderRows(rowIdx));
 		}
 
 		return rowEles;
@@ -27,7 +27,7 @@ class Board extends React.Component {
     return <Square row={rowIdx} column={columnIdx} 
 			isWinnerMove={winnerMoves && rowIdx <= winnerMoves.toRow && rowIdx >= winnerMoves.fromRow 
 										&& columnIdx <= winnerMoves.toCol && columnIdx >= winnerMoves.fromCol}
-			value={this.props.squares[rowIdx][columnIdx]}
+			value={this.props.squares[rowIdx * this.props.rows + columnIdx]}
 			onClick={() => this.props.onClick(rowIdx, columnIdx)}/>;
   }
 
