@@ -23,10 +23,36 @@ class Board extends React.Component {
 
   renderSquare(rowIdx, columnIdx) {
 		const winnerMoves = this.props.winnerMoves;
+		let isWinnerMove = false;
+
+		if (winnerMoves && (winnerMoves.type === 'v' || winnerMoves.type === 'h')) {
+			isWinnerMove = winnerMoves && rowIdx <= winnerMoves.toRow && rowIdx >= winnerMoves.fromRow 
+			&& columnIdx <= winnerMoves.toCol && columnIdx >= winnerMoves.fromCol;
+		} else if (winnerMoves && winnerMoves.type === 'ltr') {
+			console.log(this.props.stepToWin);
+			let rowWinners = [];
+			let colWinners = [];
+
+			for (let i = 0; i < this.props.stepToWin; i++) {
+				if (rowIdx === winnerMoves.rowFromPoint + i && columnIdx === winnerMoves.colFromPoint + i) {
+					isWinnerMove = true;			
+					break;
+				}
+			}
+		} else if (winnerMoves && winnerMoves.type === 'rtl') {
+			let rowWinners = [];
+			let colWinners = [];
+
+			for (let i = 0; i < this.props.stepToWin; i++) {
+				if (rowIdx === winnerMoves.rowFromPoint + i && columnIdx === winnerMoves.colFromPoint - i) {
+					isWinnerMove = true;			
+					break;
+				}
+			}
+		}
 
     return <Square row={rowIdx} column={columnIdx} 
-			isWinnerMove={winnerMoves && rowIdx <= winnerMoves.toRow && rowIdx >= winnerMoves.fromRow 
-										&& columnIdx <= winnerMoves.toCol && columnIdx >= winnerMoves.fromCol}
+			isWinnerMove={isWinnerMove}
 			value={this.props.squares[rowIdx * this.props.rows + columnIdx]}
 			onClick={() => this.props.onClick(rowIdx, columnIdx)}/>;
   }

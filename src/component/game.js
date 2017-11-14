@@ -55,7 +55,7 @@ class Game extends React.Component {
   jumpTo(step) {
     this.setState({
       stepNumber: step,
-      xIsNext: step % 2 == 0,
+      xIsNext: step % 2 === 0,
       currentSelected: step
     });
   }
@@ -82,7 +82,7 @@ class Game extends React.Component {
 
       let desc;
       if (move) {
-        const row = parseInt(historyMoves[move - 1] / GAMEBOARD_ROW);
+        const row = parseInt(historyMoves[move - 1] / GAMEBOARD_ROW, 10);
         const column = historyMoves[move - 1] % GAMEBOARD_COLUMN;
         desc = `Go to move ${move}, (${row}, ${column})`;
       } else {
@@ -115,7 +115,8 @@ class Game extends React.Component {
             rows={GAMEBOARD_ROW}
             columns={GAMEBOARD_COLUMN}
 						squares={current.squares}
-						winnerMoves={winner}
+            winnerMoves={winner}
+            stepToWin={STEP_WIN}
             onClick={(rowIdx, columnIdx) => this.handleClick(rowIdx, columnIdx)}
           />
         </div>
@@ -202,11 +203,11 @@ function findTopLeft(rowIdx, colIdx) {
   if (rowIdx === colIdx) 
     return {row: 0, col: 0};
   else if (rowIdx < colIdx) {
-    if (rowIdx === 0 || colIdx == 0)
+    if (rowIdx === 0 || colIdx === 0)
       return {row: rowIdx, col: colIdx};
     return {row: 0, col: colIdx - rowIdx};
   } else { // rowIdx > colIdx
-    if (rowIdx === 0 || colIdx == 0)
+    if (rowIdx === 0 || colIdx === 0)
       return {row: rowIdx, col: colIdx};
     return {row: rowIdx - colIdx, col: 0};
   }
@@ -230,10 +231,9 @@ function winnerDianogal(squares, lastMove) {
   if (!lastMove)
     return null;
 
-  const currentRow = parseInt(lastMove / GAMEBOARD_ROW);
+  const currentRow = parseInt(lastMove / GAMEBOARD_ROW, 10);
   const currentCol = lastMove % GAMEBOARD_COLUMN;
-
-  console.log('param lastmove', lastMove);
+  
   // dianogal ltr
   const topLeft = findTopLeft(currentRow, currentCol);
 
@@ -248,42 +248,43 @@ function winnerDianogal(squares, lastMove) {
     ltrCol++;
   }
 
-
-  console.log(`ltr str: ${strLtr}`);
   const ltrWinner = xoWinner(strLtr);
-
   if (ltrWinner) {
-    console.log('ltr winner', ltrWinner);
+    console.log('ltr winner', ltrWinner, 'result', {
+      winner: ltrWinner.winner,
+      type: 'ltr',
+      rowFromPoint: topLeft.row + ltrWinner.index,
+      colFromPoint: topLeft.col + ltrWinner.index
+    });
     return {
       winner: ltrWinner.winner,
-      type: 'ltr'
+      type: 'ltr',
+      rowFromPoint: topLeft.row + ltrWinner.index,
+      colFromPoint: topLeft.col + ltrWinner.index
     }
   }
   
   // dianogal rtl
   const topRight = findTopRight(currentRow, currentCol);
-  console.log('top right', topRight, lastMove, currentRow, currentCol);
 
   let rtlRow = topRight.row;
   let rtlCol = topRight.col;
   let strRtl = '';
 
-  while (rtlRow < GAMEBOARD_ROW - 1 && rtlCol >= 0) {
+  while (rtlRow <= GAMEBOARD_ROW - 1 && rtlCol >= 0) {
     strRtl = strRtl + squares[rtlRow  * GAMEBOARD_ROW + rtlCol];
 
     rtlRow++;
     rtlCol--;
   }
 
-  console.log(`rtl str: ${strRtl}`);
-
   const rtlWinner = xoWinner(strRtl);
-
   if (rtlWinner) {
-    console.log('rtlWinner', rtlWinner);
     return {
       winner: rtlWinner.winner,
-      type: 'rtl'
+      type: 'rtl',
+      rowFromPoint: topRight.row + rtlWinner.index,
+      colFromPoint: topRight.col - rtlWinner.index
     }
   }
     
