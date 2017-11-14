@@ -21,12 +21,9 @@ class Board extends React.Component {
 		return <div className="board-row" row-id={rowIdx}>{colEles}</div>;
 	}
 
-  renderSquare(rowIdx, columnIdx) {
-		const winnerMoves = this.props.winnerMoves;
-		let isWinnerMove = false;
-
+	checkWinnerSquare(winnerMoves, rowIdx, columnIdx) {
 		if (winnerMoves && (winnerMoves.type === 'v' || winnerMoves.type === 'h')) {
-			isWinnerMove = winnerMoves && rowIdx <= winnerMoves.toRow && rowIdx >= winnerMoves.fromRow 
+			return winnerMoves && rowIdx <= winnerMoves.toRow && rowIdx >= winnerMoves.fromRow 
 			&& columnIdx <= winnerMoves.toCol && columnIdx >= winnerMoves.fromCol;
 		} else if (winnerMoves && winnerMoves.type === 'ltr') {
 			console.log(this.props.stepToWin);
@@ -35,8 +32,7 @@ class Board extends React.Component {
 
 			for (let i = 0; i < this.props.stepToWin; i++) {
 				if (rowIdx === winnerMoves.rowFromPoint + i && columnIdx === winnerMoves.colFromPoint + i) {
-					isWinnerMove = true;			
-					break;
+					return true;
 				}
 			}
 		} else if (winnerMoves && winnerMoves.type === 'rtl') {
@@ -45,11 +41,17 @@ class Board extends React.Component {
 
 			for (let i = 0; i < this.props.stepToWin; i++) {
 				if (rowIdx === winnerMoves.rowFromPoint + i && columnIdx === winnerMoves.colFromPoint - i) {
-					isWinnerMove = true;			
-					break;
+					return true;
 				}
 			}
 		}
+
+		return false;
+	}
+
+  renderSquare(rowIdx, columnIdx) {
+		const winnerMoves = this.props.winnerMoves;
+		let isWinnerMove = this.checkWinnerSquare(winnerMoves, rowIdx, columnIdx);
 
     return <Square row={rowIdx} column={columnIdx} 
 			isWinnerMove={isWinnerMove}

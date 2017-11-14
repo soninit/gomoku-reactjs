@@ -233,7 +233,7 @@ function winnerDianogal(squares, lastMove) {
 
   const currentRow = parseInt(lastMove / GAMEBOARD_ROW, 10);
   const currentCol = lastMove % GAMEBOARD_COLUMN;
-  
+
   // dianogal ltr
   const topLeft = findTopLeft(currentRow, currentCol);
 
